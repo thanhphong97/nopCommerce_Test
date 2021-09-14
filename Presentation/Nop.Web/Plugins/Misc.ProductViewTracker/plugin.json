@@ -1,0 +1,11 @@
+﻿{
+	"Group": "MISC",
+	"FriendlyName": "ProductViewTracker",
+	"SystemName": "Misc.ProductViewTracker",
+	"Version": "1.00",
+	"SupportedVersions": [ "4.40" ],
+	"Author": "Bruno",
+	"DisplayOrder": 1,
+	"FileName": "Nop.Plugin.Misc.ProductViewTracker.dll",
+	"Description": ""
+}

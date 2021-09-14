@@ -1,0 +1,6 @@
+﻿{
+  "DataConnectionString": "Data Source=.;Initial Catalog=nopCommerce;Integrated Security=False;Persist Security Info=False;User ID=sa;Password=123",
+  "DataProvider": "sqlserver",
+  "SQLCommandTimeout": null,
+  "RawDataSettings": {}
+}
