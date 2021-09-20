@@ -16,6 +16,7 @@ using Nop.Services.Shipping;
 using Nop.Web.Factories;
 using Nop.Web.Framework.Controllers;
 using Nop.Web.Framework.Mvc.Filters;
+using Nop.Web.Models.Order;
 
 namespace Nop.Web.Controllers
 {
@@ -75,6 +76,37 @@ namespace Nop.Web.Controllers
             var model = await _orderModelFactory.PrepareCustomerOrderListModelAsync();
             return View(model);
         }
+
+        #region Tội lỗi
+        public virtual async Task<IActionResult> ListNew(List<int> orderStatuses = null, List<int> paymentStatuses = null, List<int> shippingStatuses = null)
+        {
+
+            if (!await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()))
+                return Challenge();
+
+            var model = await _orderModelFactory.PrepareOrderSearchModelAsync(new OrderSearchModel
+            {
+                OrderStatusIds = orderStatuses,
+                PaymentStatusIds = paymentStatuses,
+                ShippingStatusIds = shippingStatuses
+            });
+
+            return View(model);
+        }
+
+        [HttpPost]
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task<IActionResult> OrderList(OrderSearchModel searchModel)
+        {
+            if (!await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()))
+                return Challenge();
+
+            //prepare model
+            var model = await _orderModelFactory.PrepareOrderListModelAsync(searchModel);
+
+            return Json(model);
+        }
+        #endregion
 
         //My account / Orders / Cancel recurring order
         [HttpPost, ActionName("CustomerOrders")]

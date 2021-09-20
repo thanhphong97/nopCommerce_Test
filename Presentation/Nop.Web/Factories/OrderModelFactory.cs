@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
@@ -21,8 +22,12 @@ using Nop.Services.Payments;
 using Nop.Services.Seo;
 using Nop.Services.Shipping;
 using Nop.Services.Vendors;
+using Nop.Web.Areas.Admin.Factories;
 using Nop.Web.Models.Common;
 using Nop.Web.Models.Order;
+using Nop.Web.Framework.Extensions;
+using Nop.Web.Framework.Models.Extensions;
+using Nop.Services.Stores;
 
 namespace Nop.Web.Factories
 {
@@ -35,6 +40,10 @@ namespace Nop.Web.Factories
 
         private readonly AddressSettings _addressSettings;
         private readonly CatalogSettings _catalogSettings;
+        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        private readonly IOrderReportService _orderReportService;
+        private readonly IStoreService _storeService;
+        private readonly CurrencySettings _currencySettings;
         private readonly IAddressModelFactory _addressModelFactory;
         private readonly IAddressService _addressService;
         private readonly ICountryService _countryService;
@@ -70,6 +79,7 @@ namespace Nop.Web.Factories
 
         public OrderModelFactory(AddressSettings addressSettings,
             CatalogSettings catalogSettings,
+             CurrencySettings currencySettings,
             IAddressModelFactory addressModelFactory,
             IAddressService addressService,
             ICountryService countryService,
@@ -92,6 +102,9 @@ namespace Nop.Web.Factories
             IUrlRecordService urlRecordService,
             IVendorService vendorService,
             IWorkContext workContext,
+            IStoreService storeService,
+            IBaseAdminModelFactory baseAdminModelFactory,
+            IOrderReportService orderReportService,
             OrderSettings orderSettings,
             PdfSettings pdfSettings,
             RewardPointsSettings rewardPointsSettings,
@@ -129,11 +142,151 @@ namespace Nop.Web.Factories
             _shippingSettings = shippingSettings;
             _taxSettings = taxSettings;
             _vendorSettings = vendorSettings;
+            _baseAdminModelFactory = baseAdminModelFactory;
+            _orderReportService = orderReportService;
+            _storeService = storeService;
+            _currencySettings = currencySettings;
         }
 
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Prepare order search model
+        /// </summary>
+        /// <param name="searchModel">Order search model</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the order search model
+        /// </returns>
+        public virtual async Task<OrderSearchModel> PrepareOrderSearchModelAsync(OrderSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            searchModel.IsLoggedInAsVendor = await _workContext.GetCurrentVendorAsync() != null;
+            searchModel.BillingPhoneEnabled = _addressSettings.PhoneEnabled;
+
+            //prepare available order, payment and shipping statuses
+            await _baseAdminModelFactory.PrepareOrderStatusesAsync(searchModel.AvailableOrderStatuses);
+            if (searchModel.AvailableOrderStatuses.Any())
+            {
+                if (searchModel.OrderStatusIds?.Any() ?? false)
+                {
+                    var ids = searchModel.OrderStatusIds.Select(id => id.ToString());
+                    searchModel.AvailableOrderStatuses.Where(statusItem => ids.Contains(statusItem.Value)).ToList()
+                        .ForEach(statusItem => statusItem.Selected = true);
+                }
+                else
+                    searchModel.AvailableOrderStatuses.FirstOrDefault().Selected = true;
+            }
+
+            await _baseAdminModelFactory.PreparePaymentStatusesAsync(searchModel.AvailablePaymentStatuses);
+            if (searchModel.AvailablePaymentStatuses.Any())
+            {
+                if (searchModel.PaymentStatusIds?.Any() ?? false)
+                {
+                    var ids = searchModel.PaymentStatusIds.Select(id => id.ToString());
+                    searchModel.AvailablePaymentStatuses.Where(statusItem => ids.Contains(statusItem.Value)).ToList()
+                        .ForEach(statusItem => statusItem.Selected = true);
+                }
+                else
+                    searchModel.AvailablePaymentStatuses.FirstOrDefault().Selected = true;
+            }
+
+            await _baseAdminModelFactory.PrepareShippingStatusesAsync(searchModel.AvailableShippingStatuses);
+            if (searchModel.AvailableShippingStatuses.Any())
+            {
+                if (searchModel.ShippingStatusIds?.Any() ?? false)
+                {
+                    var ids = searchModel.ShippingStatusIds.Select(id => id.ToString());
+                    searchModel.AvailableShippingStatuses.Where(statusItem => ids.Contains(statusItem.Value)).ToList()
+                        .ForEach(statusItem => statusItem.Selected = true);
+                }
+                else
+                    searchModel.AvailableShippingStatuses.FirstOrDefault().Selected = true;
+            }
+
+            //prepare available stores
+            await _baseAdminModelFactory.PrepareStoresAsync(searchModel.AvailableStores);
+
+            //prepare available vendors
+            await _baseAdminModelFactory.PrepareVendorsAsync(searchModel.AvailableVendors);
+
+            //prepare available warehouses
+            await _baseAdminModelFactory.PrepareWarehousesAsync(searchModel.AvailableWarehouses);
+
+            //prepare available payment methods
+            searchModel.AvailablePaymentMethods = (await _paymentPluginManager.LoadAllPluginsAsync()).Select(method =>
+                new SelectListItem { Text = method.PluginDescriptor.FriendlyName, Value = method.PluginDescriptor.SystemName }).ToList();
+            searchModel.AvailablePaymentMethods.Insert(0, new SelectListItem { Text = await _localizationService.GetResourceAsync("Admin.Common.All"), Value = string.Empty });
+
+            //prepare available billing countries
+            searchModel.AvailableCountries = (await _countryService.GetAllCountriesForBillingAsync(showHidden: true))
+                .Select(country => new SelectListItem { Text = country.Name, Value = country.Id.ToString() }).ToList();
+            searchModel.AvailableCountries.Insert(0, new SelectListItem { Text = await _localizationService.GetResourceAsync("Admin.Common.All"), Value = "0" });
+
+            //prepare grid
+            searchModel.SetGridPageSize();
+
+            searchModel.HideStoresList = _catalogSettings.IgnoreStoreLimitations || searchModel.AvailableStores.SelectionIsNotPossible();
+
+            return searchModel;
+        }
+
+
+        /// <summary>
+        /// Prepare paged order list model
+        /// </summary>
+        /// <param name="searchModel">Order search model</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the order list model
+        /// </returns>
+        public virtual async Task<OrderListModel> PrepareOrderListModelAsync(OrderSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            //get parameters to filter orders
+            var orderStatusIds = (searchModel.OrderStatusIds?.Contains(0) ?? true) ? null : searchModel.OrderStatusIds.ToList();
+
+            //get orders
+            var orders = await _orderService.SearchOrdersAsync(
+                storeId: (await _storeContext.GetCurrentStoreAsync()).Id,
+                customerId: (await _workContext.GetCurrentCustomerAsync()).Id,
+                osIds: orderStatusIds);
+
+            //prepare list model
+            var model = await new OrderListModel().PrepareToGridAsync(searchModel, orders, () =>
+            {
+                //fill in model values from the entity
+                return orders.SelectAwait(async order =>
+                {
+
+                    //fill in model values from the entity
+                    var orderModel = new CustomerOrderListModel.OrderDetailsModel
+                    {
+                        Id = order.Id,
+                        OrderStatusId = order.OrderStatusId,
+                        CreatedOn = await _dateTimeHelper.ConvertToUserTimeAsync(order.CreatedOnUtc, DateTimeKind.Utc),
+                        OrderStatusEnum = order.OrderStatus,
+                        OrderStatus = await _localizationService.GetLocalizedEnumAsync(order.OrderStatus),
+                        PaymentStatus = await _localizationService.GetLocalizedEnumAsync(order.PaymentStatus),
+                        ShippingStatus = await _localizationService.GetLocalizedEnumAsync(order.ShippingStatus),
+                        IsReturnRequestAllowed = await _orderProcessingService.IsReturnRequestAllowedAsync(order),
+                        CustomOrderNumber = order.CustomOrderNumber
+                    };
+
+                    var orderTotalInCustomerCurrency = _currencyService.ConvertCurrency(order.OrderTotal, order.CurrencyRate);
+                    orderModel.OrderTotal = await _priceFormatter.FormatPriceAsync(orderTotalInCustomerCurrency, true, order.CustomerCurrencyCode, false, (await _workContext.GetWorkingLanguageAsync()).Id);
+
+                    return orderModel;
+                });
+            });
+
+            return model;
+        }
 
         /// <summary>
         /// Prepare the customer order list model

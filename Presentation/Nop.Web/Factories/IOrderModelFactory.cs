@@ -29,6 +29,28 @@ namespace Nop.Web.Factories
         /// </returns>
         Task<OrderDetailsModel> PrepareOrderDetailsModelAsync(Order order);
 
+
+        /// <summary>
+        /// Prepare order search model
+        /// </summary>
+        /// <param name="searchModel">Order search model</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the order search model
+        /// </returns>
+        Task<OrderSearchModel> PrepareOrderSearchModelAsync(OrderSearchModel searchModel);
+
+
+        /// <summary>
+        /// Prepare paged order list model
+        /// </summary>
+        /// <param name="searchModel">Order search model</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the order list model
+        /// </returns>
+        Task<OrderListModel> PrepareOrderListModelAsync(OrderSearchModel searchModel);
+
         /// <summary>
         /// Prepare the shipment details model
         /// </summary>
