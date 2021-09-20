@@ -347,7 +347,7 @@ else
                 case RenderButtonDetail buttonDetail:
                     <text>
                         render: function (data, type, row, meta) {
-                        return '<a class="@buttonDetail.ClassName" href="@GetUrl(buttonDetail.Url)' + data + '"><i class="fas fa-baby"></i>@T("Account.CustomerOrders.OrderDetails").Text</a>';
+                        return '<a class="@buttonDetail.ClassName" href="@GetUrl(buttonDetail.Url)' + data + '"><i class="fas fa-list-alt"></i>@T("Account.CustomerOrders.OrderDetails").Text</a>';
                         },
                     </text>
                     break;
@@ -442,4 +442,5 @@ else
         {<text>,</text>}
         </text>
     }
-]           
+],
+"order": [[@Model.SortBy, '@Model.SortDirection']]     

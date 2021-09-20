@@ -79,7 +79,7 @@
                     </div>
 
                     <div class="card card-default">
-                        <div class="card-body">
+                        <div class="card-body" id="div-orders-grid">
                             @{
                                 var gridModel = new DataTablesModel
                                 {
@@ -92,11 +92,17 @@
                                     Ordering = true,
                                     ServerSide = false,
                                     RefreshButton = false,
+
+                                    //default ordering
+                                    SortBy = 2,
+                                    SortDirection = DataTablesModel.DESCENDING_ORDERING,
+
                                     //FooterCallback = !Model.IsLoggedInAsVendor ? "ordersfootercallback" : null,
                                     //FooterColumns = !Model.IsLoggedInAsVendor ? 10 : 0,
                                     Filters = new List<FilterParameter>
-                                                                                                                                            {
+                                                                                                                                                                {
                                     new FilterParameter(nameof(Model.OrderStatusIds)),
+
                                 }
                                 };
 
@@ -104,6 +110,8 @@
                                 {
                                     Title = T("Admin.Orders.Fields.CustomOrderNumber").Text,
                                     Width = "20"
+
+
                                 });
 
                                 gridModel.ColumnCollection.Add(new ColumnProperty("OrderStatus")
@@ -137,6 +145,8 @@
                             @await Html.PartialAsync("Table", gridModel)
 
                             <script>
+
+
                                 function renderColumnOrderStatus(data, type, row, meta) {
                                     var color;
                                     switch (row.OrderStatusId) {
