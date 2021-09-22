@@ -28,6 +28,8 @@ using Nop.Web.Models.Order;
 using Nop.Web.Framework.Extensions;
 using Nop.Web.Framework.Models.Extensions;
 using Nop.Services.Stores;
+using Nop.Services.Security;
+using Nop.Services.Media;
 
 namespace Nop.Web.Factories
 {
@@ -44,6 +46,8 @@ namespace Nop.Web.Factories
         private readonly IOrderReportService _orderReportService;
         private readonly IStoreService _storeService;
         private readonly CurrencySettings _currencySettings;
+        private readonly IEncryptionService _encryptionService;
+        private readonly IPictureService _pictureService;
         private readonly IAddressModelFactory _addressModelFactory;
         private readonly IAddressService _addressService;
         private readonly ICountryService _countryService;
@@ -92,9 +96,11 @@ namespace Nop.Web.Factories
             IOrderService orderService,
             IOrderTotalCalculationService orderTotalCalculationService,
             IPaymentPluginManager paymentPluginManager,
+            IEncryptionService encryptionService,
             IPaymentService paymentService,
             IPriceFormatter priceFormatter,
             IProductService productService,
+            IPictureService pictureService,
             IRewardPointService rewardPointService,
             IShipmentService shipmentService,
             IStateProvinceService stateProvinceService,
@@ -146,6 +152,8 @@ namespace Nop.Web.Factories
             _orderReportService = orderReportService;
             _storeService = storeService;
             _currencySettings = currencySettings;
+            _encryptionService = encryptionService;
+            _pictureService = pictureService;
         }
 
         #endregion
@@ -437,6 +445,11 @@ namespace Nop.Web.Factories
             var paymentMethod = await _paymentPluginManager
                 .LoadPluginBySystemNameAsync(order.PaymentMethodSystemName, customer, order.StoreId);
             model.PaymentMethod = paymentMethod != null ? await _localizationService.GetLocalizedFriendlyNameAsync(paymentMethod, languageId) : order.PaymentMethodSystemName;
+            // cardnumber
+            var maskedCreditCardNumberDecrypted = _encryptionService.DecryptText(order.MaskedCreditCardNumber);
+            if (!string.IsNullOrEmpty(maskedCreditCardNumberDecrypted))
+                model.CardNumber = maskedCreditCardNumberDecrypted;
+
             model.PaymentMethodStatus = await _localizationService.GetLocalizedEnumAsync(order.PaymentStatus);
             model.CanRePostProcessPayment = await _paymentService.CanRePostProcessPaymentAsync(order);
             //custom values
@@ -584,7 +597,6 @@ namespace Nop.Web.Factories
             foreach (var orderItem in orderItems)
             {
                 var product = await _productService.GetProductByIdAsync(orderItem.ProductId);
-
                 var orderItemModel = new OrderDetailsModel.OrderItemModel
                 {
                     Id = orderItem.Id,
@@ -596,7 +608,12 @@ namespace Nop.Web.Factories
                     ProductSeName = await _urlRecordService.GetSeNameAsync(product),
                     Quantity = orderItem.Quantity,
                     AttributeInfo = orderItem.AttributeDescription,
+                    //ProductImgUrl = product.
                 };
+                // product thumb
+                var defaultProductPicture = (await _pictureService.GetPicturesByProductIdAsync(product.Id, 1)).FirstOrDefault();
+                (orderItemModel.ProductImgUrl, _) = await _pictureService.GetPictureUrlAsync(defaultProductPicture, 75);
+
                 //rental info
                 if (product.IsRental)
                 {

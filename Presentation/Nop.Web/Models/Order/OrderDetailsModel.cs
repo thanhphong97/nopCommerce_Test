@@ -48,6 +48,7 @@ namespace Nop.Web.Models.Order
         public string VatNumber { get; set; }
 
         public string PaymentMethod { get; set; }
+        public string CardNumber{ get; set; }
         public string PaymentMethodStatus { get; set; }
         public bool CanRePostProcessPayment { get; set; }
         public Dictionary<string, object> CustomValues { get; set; }
@@ -96,6 +97,7 @@ namespace Nop.Web.Models.Order
             public string RentalInfo { get; set; }
 
             public string VendorName { get; set; }
+            public string ProductImgUrl{ get; set; }
 
             //downloadable product properties
             public int DownloadId { get; set; }

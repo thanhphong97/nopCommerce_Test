@@ -11,6 +11,14 @@ namespace Nop.Web.Framework.Models.DataTables
 
         protected const string DEFAULT_PAGING_TYPE = "simple_numbers";
 
+        // 'DESC' (descending ordering)
+        public const string DESCENDING_ORDERING = "desc";
+
+        // 'ASC' (ascending ordering)
+        public const string ASCENDING_ORDERING = "asc";
+
+        // The frist column
+        protected const int FRIST_COLUMN = 0;
         #endregion
 
         #region Ctor
@@ -27,6 +35,10 @@ namespace Nop.Web.Framework.Models.DataTables
             Processing = true;
             Paging = true;
             PagingType = DEFAULT_PAGING_TYPE;
+
+            // Default ordering
+            SortBy = FRIST_COLUMN;
+            SortDirection = DESCENDING_ORDERING;
 
             Filters = new List<FilterParameter>();
             ColumnCollection = new List<ColumnProperty>();
@@ -167,7 +179,17 @@ namespace Nop.Web.Framework.Models.DataTables
         /// Gets or set column collection 
         /// </summary>
         public IList<ColumnProperty> ColumnCollection { get; set; }
-        
+
+        /// <summary>
+        /// the column to order on
+        /// </summary>
+        public int SortBy { get; set; }
+
+        /// <summary>
+        /// 'ASC' (ascending ordering) or 'DESC' (descending ordering)
+        /// </summary>
+        public string SortDirection { get; set; }
+
         #endregion
     }
 }

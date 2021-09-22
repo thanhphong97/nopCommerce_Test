@@ -68,17 +68,23 @@ namespace Nop.Web.Controllers
 
         //My account / Orders
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> CustomerOrders()
+        public virtual async Task<IActionResult> CustomerOrders(List<int> orderStatuses = null, List<int> paymentStatuses = null, List<int> shippingStatuses = null)
         {
             if (!await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()))
                 return Challenge();
 
-            var model = await _orderModelFactory.PrepareCustomerOrderListModelAsync();
+            var model = await _orderModelFactory.PrepareOrderSearchModelAsync(new OrderSearchModel
+            {
+                OrderStatusIds = orderStatuses,
+                PaymentStatusIds = paymentStatuses,
+                ShippingStatusIds = shippingStatuses
+            });
+
             return View(model);
         }
 
         #region Tội lỗi
-        public virtual async Task<IActionResult> ListNew(List<int> orderStatuses = null, List<int> paymentStatuses = null, List<int> shippingStatuses = null)
+        public virtual async Task<IActionResult> List(List<int> orderStatuses = null, List<int> paymentStatuses = null, List<int> shippingStatuses = null)
         {
 
             if (!await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()))
