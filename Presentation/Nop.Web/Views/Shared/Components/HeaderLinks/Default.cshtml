@@ -78,8 +78,9 @@
                 });
             });
         </script>
-    @{
-        if (Model.IsAuthenticated)
+    }
+
+    @{ if (Model.IsAuthenticated)
         {
             <script asp-location="Footer">
                 @*$('#logout').click(function () {
