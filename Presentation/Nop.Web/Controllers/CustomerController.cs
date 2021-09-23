@@ -576,7 +576,10 @@ namespace Nop.Web.Controllers
                 TempData[$"{NopCookieDefaults.Prefix}{NopCookieDefaults.IgnoreEuCookieLawWarning}"] = true;
             }
 
-            return RedirectToRoute("Homepage");
+            //The consumer shall be directed to the “Sign - In” page of the consumer website
+            // to notification that the consumer log out succesful
+            _notificationService.SuccessNotification($"{ await _localizationService.GetResourceAsync("ActivityLog.PublicStore.Logout")} succesful !!!!!");
+            return RedirectToRoute("Login");
         }
 
         #endregion

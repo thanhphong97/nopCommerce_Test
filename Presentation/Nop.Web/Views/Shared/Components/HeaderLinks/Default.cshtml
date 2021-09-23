@@ -8,7 +8,7 @@
         @if (Model.IsAuthenticated)
         {
             <li><a href="@Url.RouteUrl("CustomerInfo")" class="ico-account">@T("Account.MyAccount")@*@Model.CustomerName*@</a></li>
-            <li><a href="@Url.RouteUrl("Logout")" class="ico-logout">@T("Account.Logout")</a></li>
+            <li><a href="#" id="logout" class="ico-logout">@T("Account.Logout")</a></li>
         }
         else
         {
@@ -78,5 +78,42 @@
                 });
             });
         </script>
+    @{
+        if (Model.IsAuthenticated)
+        {
+            <script asp-location="Footer">
+                @*$('#logout').click(function () {
+                    var reallyLogout = confirm("Do you really want to log out?");
+                    if (reallyLogout) {
+                        location.href = "@Url.RouteUrl("Logout")";
+                    }
+                });*@
+
+                const ui = {
+                    confirm: async (message) => createConfirm(message)
+                }
+
+                const createConfirm = (message) => {
+                    return new Promise((complete, failed) => {
+                        $('#confirmMessage').text(message)
+
+                        $('#confirmYes').off('click');
+                        $('#confirmNo').off('click');
+
+                        $('#confirmYes').on('click', () => { $('.confirm').hide(); complete(true); });
+                        $('#confirmNo').on('click', () => { $('.confirm').hide(); complete(false); });
+
+                        $('.confirm').show();
+                    });
+                }
+
+                $('#logout').click(async function () {
+                     const confirm = await ui.confirm('Are you sure you want to do this?');
+                     if (confirm) {
+                         location.href = "@Url.RouteUrl("Logout")";
+                     }
+                });
+            </script>
+        }
     }
 </div>

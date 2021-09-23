@@ -422,6 +422,9 @@ namespace Nop.Services.Customers
                 await _workContext.SetCurrentCustomerAsync(customer);
             }
 
+            // to notification that the consumer login succesful
+            _notificationService.SuccessNotification($"Wellcome {customer.Email} !!!!!");
+
             //sign in new customer
             await _authenticationService.SignInAsync(customer, isPersist);
 
