@@ -32,6 +32,10 @@ namespace Nop.Core.Domain.Messages
         /// </summary>
         public const string CustomerPasswordRecoveryMessage = "Customer.PasswordRecovery";
 
+        /// <summary>
+        /// Represents system name of password recovery message
+        /// </summary>
+        public const string CustomerPasswordChangedMessage = "Customer.PasswordChanged";
         #endregion
 
         #region Order

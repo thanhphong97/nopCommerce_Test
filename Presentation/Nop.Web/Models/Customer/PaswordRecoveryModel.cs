@@ -12,6 +12,15 @@ namespace Nop.Web.Models.Customer
 
         public string Result { get; set; }
 
+        public ResultType Type { get; set; }
+
         public bool DisplayCaptcha { get; set; }
+
+
+        public enum ResultType
+        {
+            error,
+            success
+        }
     }
 }

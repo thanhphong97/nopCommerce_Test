@@ -546,12 +546,12 @@
                             {
                                 <col width="1" />
                             }
+                            <col width="1" />
                             <col />
                             @if (Model.ShowVendorName)
                             {
                                 <col width="1" />
                             }
-                            <col width="1" />
                             <col width="1" />
                             <col width="1" />
                             <col width="1" />
@@ -564,11 +564,11 @@
                                         @T("Order.Product(s).SKU")
                                     </th>
                                 }
-                                <th class="name">
-                                    @T("Order.Product(s).Name")
-                                </th>
                                 <th class="product-picture">
                                     @T("ShoppingCart.Image")
+                                </th>
+                                <th class="name">
+                                    @T("Order.Product(s).Name")
                                 </th>
                                 @if (Model.ShowVendorName)
                                 {
@@ -598,6 +598,13 @@
                                         <span class="sku-number">@item.Sku</span>
                                     </td>
                                 }
+
+                                <td class="product-picture">
+                                    <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })">
+                                        <img src="@(item.ProductImgUrl)" alt="avatar" />
+                                    </a>
+                                </td>
+
                                 <td class="product">
                                     @if (!Model.PrintMode)
                                     {
@@ -632,11 +639,6 @@
                                         </div>
                                     }
                                     @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderDetailsProductLine, additionalData = item })
-                                </td>
-                                <td class="product-picture">
-                                    <a href="@Url.RouteUrl("GetDownload", new { orderItemId = item.OrderItemGuid })">
-                                        <img src="@(item.ProductImgUrl)" alt="avatar" />
-                                    </a>
                                 </td>
 
                                 @if (Model.ShowVendorName)

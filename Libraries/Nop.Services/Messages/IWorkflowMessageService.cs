@@ -74,6 +74,16 @@ namespace Nop.Services.Messages
         /// </returns>
         Task<IList<int>> SendCustomerPasswordRecoveryMessageAsync(Customer customer, int languageId);
 
+        /// <summary>
+        /// Sends password changed message to a customer
+        /// </summary>
+        /// <param name="customer">Customer instance</param>
+        /// <param name="languageId">Message language identifier</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the queued email identifier
+        /// </returns>
+        Task<IList<int>> SendCustomerPasswordChangedMessageAsync(Customer customer, int languageId);
         #endregion
 
         #region Order workflow

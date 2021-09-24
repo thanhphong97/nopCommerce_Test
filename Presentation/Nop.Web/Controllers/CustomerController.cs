@@ -633,10 +633,12 @@ namespace Nop.Web.Controllers
                         (await _workContext.GetWorkingLanguageAsync()).Id);
 
                     model.Result = await _localizationService.GetResourceAsync("Account.PasswordRecovery.EmailHasBeenSent");
+                    model.Type = PasswordRecoveryModel.ResultType.success;
                 }
                 else
                 {
                     model.Result = await _localizationService.GetResourceAsync("Account.PasswordRecovery.EmailNotFound");
+                    model.Type = PasswordRecoveryModel.ResultType.error;
                 }
             }
 
@@ -736,9 +738,12 @@ namespace Nop.Web.Controllers
             //authenticate customer after changing password
             await _customerRegistrationService.SignInCustomerAsync(customer, null, true);
 
+            _notificationService.SuccessNotification($"{ await _localizationService.GetResourceAsync("Account.PasswordRecovery.PasswordHasBeenChanged")} succesful !!!!!");
+
             model.DisablePasswordChanging = true;
             model.Result = await _localizationService.GetResourceAsync("Account.PasswordRecovery.PasswordHasBeenChanged");
-            return View(model);
+            //return View(model);
+            return RedirectToRoute("Homepage");
         }
 
         #endregion     
@@ -1028,9 +1033,15 @@ namespace Nop.Web.Controllers
                             //raise event       
                             await _eventPublisher.PublishAsync(new CustomerActivatedEvent(customer));
 
-                            returnUrl = Url.RouteUrl("RegisterResult", new { resultId = (int)UserRegistrationType.Standard, returnUrl });
-                            return await _customerRegistrationService.SignInCustomerAsync(customer, returnUrl, true);
+                            // notification that his/her consumer account has been created
+                            _notificationService.SuccessNotification($"Consumer account has been created.");
 
+                            //returnUrl = Url.RouteUrl("RegisterResult", new { resultId = (int)UserRegistrationType.Standard, returnUrl });
+                            //return await _customerRegistrationService.SignInCustomerAsync(customer, returnUrl, true);
+
+                            // If the consumer account is successfully created, the consumer shall be directed to the “Home” page of the consumer website
+                            await _customerRegistrationService.SignInCustomerAsync(customer, null, true);
+                            return RedirectToRoute("Homepage");
                         default:
                             return RedirectToRoute("Homepage");
                     }
@@ -1658,6 +1669,10 @@ namespace Nop.Web.Controllers
                 var changePasswordResult = await _customerRegistrationService.ChangePasswordAsync(changePasswordRequest);
                 if (changePasswordResult.Success)
                 {
+                    // send email 'Your Password Has Been Changed'
+                    await _workflowMessageService.SendCustomerPasswordChangedMessageAsync(
+                        customer, (await _workContext.GetWorkingLanguageAsync()).Id);
+
                     _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Account.ChangePassword.Success"));
                     return View(model);
                 }
