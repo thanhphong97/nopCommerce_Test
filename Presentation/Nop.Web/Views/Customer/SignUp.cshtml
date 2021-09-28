@@ -1,0 +1,69 @@
+﻿@model RegisterModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Register").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-registration-page");
+}
+
+<div class="page registration-page">
+    <div class="page-title">
+        <h1>@T("Account.Register")</h1>
+    </div>
+    <div class="page-body">
+        @{
+            if (Model.IsVerifyCode)
+            {
+                <form asp-route="VerifyCode" asp-route-returnurl="@Context.Request.Query[" ReturnUrl"]" method="post" autocomplete="off">
+                    <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                    <div class="title">
+                        <strong>@T("Account.YourPersonalDetails")</strong>
+                    </div>
+
+                    <div class="inputs">
+                        <input style="display:none" asp-for="Email" />
+                        <label asp-for="VerifyCode" asp-postfix=":"></label>
+                        <input asp-for="VerifyCode" />
+                        <nop-required />
+                        <span asp-validation-for="VerifyCode"></span>
+                    </div>
+
+                    <div class="buttons">
+                        <button type="submit" name="VerifyCode" id="VerifyCode" class="button-1 register-next-step-button">Verify Code</button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <form asp-route="SignUp" asp-route-returnurl="@Context.Request.Query[" ReturnUrl"]" method="post" autocomplete="off">
+                    <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                    <div class="inputs">
+                        <label asp-for="Email" asp-postfix=":"></label>
+                        <input asp-for="Email" />
+                        <nop-required />
+                        <span asp-validation-for="Email"></span>
+                    </div>
+
+                    <div class="buttons">
+                    @{
+                        if (Model.ResendVerifyCode)
+                        {
+                                            <button type="submit" name="get-code" id="get-code" class="button-1 register-next-step-button">Resend Verification Code</button>
+
+                        }
+                        else
+                        {
+                            <button type="submit" name="get-code" id="get-code" class="button-1 register-next-step-button">Send Verifition Code</button>
+                        }
+                    }
+                    </div>
+                </form>
+            }
+        }
+        <div class="external-authentication">
+            @await Component.InvokeAsync("ExternalMethods", "ExternalAuthentication")
+        </div>
+    </div>
+</div>

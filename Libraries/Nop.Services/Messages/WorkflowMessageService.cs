@@ -14,6 +14,7 @@ using Nop.Core.Domain.News;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
 using Nop.Core.Domain.Vendors;
+using Nop.Core.Domain.VerifyCodes;
 using Nop.Core.Events;
 using Nop.Data.Extensions;
 using Nop.Services.Affiliates;
@@ -433,6 +434,41 @@ namespace Nop.Services.Messages
 
                 var toEmail = customer.Email;
                 var toName = await _customerService.GetCustomerFullNameAsync(customer);
+
+                return await SendNotificationAsync(messageTemplate, emailAccount, languageId, tokens, toEmail, toName);
+            }).ToListAsync();
+        }
+
+        public virtual async Task<IList<int>> SendCustomerVerificationCodeAsync(VerifyCode verifyCode, int languageId)
+        {
+            if (verifyCode == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            var store = await _storeContext.GetCurrentStoreAsync();
+            languageId = await EnsureLanguageIsActiveAsync(languageId, store.Id);
+
+            var messageTemplates = await GetActiveMessageTemplatesAsync("NewCustomer.SendVerificationCode", store.Id);
+            if (!messageTemplates.Any())
+                return new List<int>();
+
+            return await messageTemplates.SelectAwait(async messageTemplate =>
+            {
+                //email account
+                var emailAccount = await GetEmailAccountOfMessageTemplateAsync(messageTemplate, languageId);
+
+                var tokens = new List<Token>();
+                await _messageTokenProvider.AddStoreTokensAsync(tokens, store, emailAccount);
+
+                tokens.Add(new Token("Customer.Email", verifyCode.Email));
+                tokens.Add(new Token("SecurityCode", verifyCode.Code));
+
+                //event notification
+                await _eventPublisher.MessageTokensAddedAsync(messageTemplate, tokens);
+
+                var toEmail = verifyCode.Email;
+                var toName = "New Customer";
 
                 return await SendNotificationAsync(messageTemplate, emailAccount, languageId, tokens, toEmail, toName);
             }).ToListAsync();

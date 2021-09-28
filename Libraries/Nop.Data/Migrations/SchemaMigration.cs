@@ -24,6 +24,7 @@ using Nop.Core.Domain.Tasks;
 using Nop.Core.Domain.Tax;
 using Nop.Core.Domain.Topics;
 using Nop.Core.Domain.Vendors;
+using Nop.Core.Domain.VerifyCodes;
 
 namespace Nop.Data.Migrations
 {
@@ -210,6 +211,7 @@ namespace Nop.Data.Migrations
             _migrationManager.BuildTable<VendorAttribute>(Create);
             _migrationManager.BuildTable<VendorAttributeValue>(Create);
             _migrationManager.BuildTable<VendorNote>(Create);
+            _migrationManager.BuildTable<VerifyCode>(Create);
         }
     }
 }

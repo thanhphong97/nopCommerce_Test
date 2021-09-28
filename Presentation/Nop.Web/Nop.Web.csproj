@@ -35,8 +35,19 @@
     <Content Remove="Plugins\**;Themes\**" />
     <EmbeddedResource Remove="Plugins\**;Themes\**" />
     <None Remove="Plugins\**;Themes\**" />
+    <Content Include="App_Data\appsettings.json" />
+    <Content Include="App_Data\dataSettings.json" />
+    <Content Include="App_Data\plugins.json" />
 
     <Content Include="Plugins\bin\placeholder.txt" CopyToPublishDirectory="PreserveNewest" />
+
+    <Content Include="Themes\BakeDelightsTheme\Views\Shared\Confirm_logout.cshtml" />
+
+    <Content Include="Themes\BakeDelightsTheme\Views\Shared\Table.cshtml" />
+
+    <Content Include="Themes\BakeDelightsTheme\Views\Shared\_GridLocalization.cshtml" />
+
+    <Content Include="Themes\BakeDelightsTheme\Views\Shared\_Table.Definition.cshtml" />
     <None Include="Plugins\**" CopyToPublishDirectory="PreserveNewest" Exclude="Plugins\**\runtimes\**;Plugins\**\ref\**;Plugins\**\*.pdb" />
 
     <Content Include="Themes\**" CopyToPublishDirectory="PreserveNewest" Exclude="Themes\**\*.config;Themes\**\*.cshtml;Themes\**\*.json" />
@@ -44,6 +55,10 @@
 
     <!-- We copy the \Logs directory -->
     <Content Include="Logs\**" CopyToPublishDirectory="PreserveNewest" />
+    <None Remove="Themes\BakeDelightsTheme\Views\Shared\Confirm_logout.cshtml" />
+    <None Remove="Themes\BakeDelightsTheme\Views\Shared\Table.cshtml" />
+    <None Remove="Themes\BakeDelightsTheme\Views\Shared\_GridLocalization.cshtml" />
+    <None Remove="Themes\BakeDelightsTheme\Views\Shared\_Table.Definition.cshtml" />
 
     <None Update="Areas\Admin\sitemap.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -60,7 +75,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Admin\Validators\VerifyCode\" />
     <Folder Include="Plugins\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Themes\BakeDelightsTheme\Views\Shared\Confirm_logout.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\BakeDelightsTheme\Views\Shared\Table.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\BakeDelightsTheme\Views\Shared\_GridLocalization.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\BakeDelightsTheme\Views\Shared\_Table.Definition.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <!-- This target execute after "Build" target.

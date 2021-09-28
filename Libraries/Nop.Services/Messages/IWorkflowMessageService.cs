@@ -9,6 +9,7 @@ using Nop.Core.Domain.News;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
 using Nop.Core.Domain.Vendors;
+using Nop.Core.Domain.VerifyCodes;
 
 namespace Nop.Services.Messages
 {
@@ -84,6 +85,8 @@ namespace Nop.Services.Messages
         /// The task result contains the queued email identifier
         /// </returns>
         Task<IList<int>> SendCustomerPasswordChangedMessageAsync(Customer customer, int languageId);
+
+        Task<IList<int>> SendCustomerVerificationCodeAsync(VerifyCode verifyCode, int languageId);
         #endregion
 
         #region Order workflow

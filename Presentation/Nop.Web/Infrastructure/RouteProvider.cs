@@ -47,6 +47,11 @@ namespace Nop.Web.Infrastructure
                 pattern: $"{lang}/register/",
                 defaults: new { controller = "Customer", action = "Register" });
 
+            //SignUp
+            endpointRouteBuilder.MapControllerRoute(name: "SignUp",
+                pattern: $"{lang}/SignUp/",
+                defaults: new { controller = "Customer", action = "SignUp" });
+
             //logout
             endpointRouteBuilder.MapControllerRoute(name: "Logout",
                 pattern: $"{lang}/logout/",
@@ -264,7 +269,7 @@ namespace Nop.Web.Infrastructure
 
             //register result page
             endpointRouteBuilder.MapControllerRoute(name: "RegisterResult",
-                pattern: $"{lang}/registerresult/{{resultId:min(0)}}",
+                pattern: $"{lang}/registerresult/{{resultId:min(0)}}/{{email?}}",
                 defaults: new { controller = "Customer", action = "RegisterResult" });
 
             //check username availability (AJAX)
